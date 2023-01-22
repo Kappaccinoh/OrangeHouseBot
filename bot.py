@@ -1,151 +1,144 @@
 import os
-import json
 import telebot
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 
-def lamda_handler(_event, _context):
-    conn = http.client.HTTPSConnection(TELEGRAM_API_HOST)
-    telegram_token = os.getenv('BOT_TOKEN')
-    if telegram_token is not None:
 
-        # Global Constants
-        list_exists = False
+# Global Constants
+list_exists = False
 
-        # original list is stored as such - all variables are strings
-        # [
-        #   [name, room_number, handle]
-        # ]
-        title = ""
-        list_of_names = []
+# original list is stored as such - all variables are strings
+# [
+#   [name, room_number, handle]
+# ]
+title = ""
+list_of_names = []
 
 
-        # Helper Functions
-        def extract_arg(arg):
-            return arg.split()
+# Helper Functions
+def extract_arg(arg):
+    return arg.split()
 
-        def extract_title(arg):
-            return arg[8:]
+def extract_title(arg):
+    return arg[8:]
 
-        def clear_list():
-            list_of_names = []
+def clear_list():
+    list_of_names = []
 
-        def print_message():
-            global title
-            message = title + "\n"
-            for row in list_of_names:
-                message = message + row[0] + " " + row[1] + " " + row[2] + "\n"
-            return message
+def print_message():
+    global title
+    message = title + "\n"
+    for row in list_of_names:
+        message = message + row[0] + " " + row[1] + " " + row[2] + "\n"
+    return message
 
-        def update_message(name, room_number, username):
-            global list_of_names
-            flag = True
-            for entry in list_of_names:
-                if "@" + username == entry[2]:
-                    entry[0] = name
-                    entry[1] = room_number
-                    flag = False
-                    break
-            
-            if flag:
-                detail = [name, room_number, "@" + username]
-                list_of_names.append(detail)
+def update_message(name, room_number, username):
+    global list_of_names
+    flag = True
+    for entry in list_of_names:
+        if "@" + username == entry[2]:
+            entry[0] = name
+            entry[1] = room_number
+            flag = False
+            break
 
-        def remove_name(username):
-            global list_of_names
-            for entry in list_of_names:
-                if "@" + username == entry[2]:
-                    list_of_names.remove(entry)
-                    return True
-            return False
+    if flag:
+        detail = [name, room_number, "@" + username]
+        list_of_names.append(detail)
 
-
-        # Bot Commands
-        @bot.message_handler(commands=['start'])
-        def send_welcome(message):
-            bot.reply_to(message, "Hi there, I am the dedicated Bot for Orange House!\nType in /help for my full list of commands.")
+def remove_name(username):
+    global list_of_names
+    for entry in list_of_names:
+        if "@" + username == entry[2]:
+            list_of_names.remove(entry)
+            return True
+    return False
 
 
-        @bot.message_handler(commands=['help'])
-        def send_help(message):
-            bot.reply_to(message, 
-                "/create <title> - Creates a new and empty list\n" +
-                "/join <your name> <room_number> - Joins and or updates the current list (type /join again to override your previous entry)\n" +
-                "/remove - Removes your current entry\n" +
-                "/end - Deletes the current list of names"
-            )
+# Bot Commands
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "Hi there, I am the dedicated Bot for Orange House!\nType in /help for my full list of commands.")
 
 
-        @bot.message_handler(commands=['create'])
-        def create_new_list(message):
-            global list_exists
-            global title
-            if not list_exists:
-                try:
-                    ls_title = extract_arg(message.text)[1]
-                except:
-                    bot.reply_to(message, "Missing parameters, type '/create <title>'")
-                else:        
-                    title = extract_title(message.text)
-                    list_exists = True
-                    # bot.send_message(message.chat.id, title)
-                    bot.send_message(message.chat.id, "To add an item to the list, type '/join <your name> <room_number>'")
-            else:
-                bot.reply_to(message, "There is an ongoing list already, type /end if you wish to terminate the current list, if not /join ")
-
-            
-        @bot.message_handler(commands=['join'])
-        def send_join_error(message):
-            global list_exists
-            global list_of_names
-            if list_exists:
-                try:
-                    name = extract_arg(message.text)[1]
-                    room_number = extract_arg(message.text)[2]
-                except:
-                    bot.reply_to(message, "Missing parameters, type '/join <your name> <room_number>'")
-                else:        
-                    username = message.from_user.username
-                    update_message(name, room_number, username)
-                    final_list = print_message()
-                    bot.send_message(message.chat.id, final_list)
-            else:
-                bot.reply_to(message, "The list does not exist yet, type '/create <title>' to create a new list")
-
-        @bot.message_handler(commands=['remove'])
-        def remove_entry(message):
-            global list_exists
-            global list_of_names
-            if list_exists:
-                remove_name(message.from_user.username)
-                bot.reply_to(message, "Removed successfully, type '/join <your name> <room_number>' to write a new entry")
-                final_list = print_message()
-                bot.send_message(message.chat.id, final_list)
-
-            else:
-                bot.reply_to(message, "The list does not exist yet, type '/create <title>' to create a new list")
+@bot.message_handler(commands=['help'])
+def send_help(message):
+    bot.reply_to(message, 
+        "/create <title> - Creates a new and empty list\n" +
+        "/join <your name> <room_number> - Joins and or updates the current list (type /join again to override your previous entry)\n" +
+        "/remove - Removes your current entry\n" +
+        "/end - Deletes the current list of names"
+    )
 
 
-        @bot.message_handler(commands=['end'])
-        def delete_list(message):
-            global list_exists
-            global list_of_names
-            global title
-            if list_exists:
-                list_exists = False
-                list_of_names=[]
-                title = ""
-                bot.reply_to(message, "List deleted successfully, type '/create <title>' to create a new list")
-                
-            else:
-                bot.reply_to(message, "The list does not exist yet, type '/create <title>' to create a new list")
-
-
-        @bot.message_handler(func=lambda message: True)
-        def echo_message(message):
-            bot.reply_to(message, "Invalid command, type /help for a full list of commands.")
-
-        bot.infinity_polling()
+@bot.message_handler(commands=['create'])
+def create_new_list(message):
+    global list_exists
+    global title
+    if not list_exists:
+        try:
+            ls_title = extract_arg(message.text)[1]
+        except:
+            bot.reply_to(message, "Missing parameters, type '/create <title>'")
+        else:        
+            title = extract_title(message.text)
+            list_exists = True
+            # bot.send_message(message.chat.id, title)
+            bot.send_message(message.chat.id, "To add an item to the list, type '/join <your name> <room_number>'")
     else:
-        raise EnvironmentError("Missing BOT_TOKEN env variable!")
+        bot.reply_to(message, "There is an ongoing list already, type /end if you wish to terminate the current list, if not /join ")
+
+
+@bot.message_handler(commands=['join'])
+def send_join_error(message):
+    global list_exists
+    global list_of_names
+    if list_exists:
+        try:
+            name = extract_arg(message.text)[1]
+            room_number = extract_arg(message.text)[2]
+        except:
+            bot.reply_to(message, "Missing parameters, type '/join <your name> <room_number>'")
+        else:        
+            username = message.from_user.username
+            update_message(name, room_number, username)
+            final_list = print_message()
+            bot.send_message(message.chat.id, final_list)
+    else:
+        bot.reply_to(message, "The list does not exist yet, type '/create <title>' to create a new list")
+
+@bot.message_handler(commands=['remove'])
+def remove_entry(message):
+    global list_exists
+    global list_of_names
+    if list_exists:
+        remove_name(message.from_user.username)
+        bot.reply_to(message, "Removed successfully, type '/join <your name> <room_number>' to write a new entry")
+        final_list = print_message()
+        bot.send_message(message.chat.id, final_list)
+
+    else:
+        bot.reply_to(message, "The list does not exist yet, type '/create <title>' to create a new list")
+
+
+@bot.message_handler(commands=['end'])
+def delete_list(message):
+    global list_exists
+    global list_of_names
+    global title
+    if list_exists:
+        list_exists = False
+        list_of_names=[]
+        title = ""
+        bot.reply_to(message, "List deleted successfully, type '/create <title>' to create a new list")
+
+    else:
+        bot.reply_to(message, "The list does not exist yet, type '/create <title>' to create a new list")
+
+
+@bot.message_handler(func=lambda message: True)
+def echo_message(message):
+    bot.reply_to(message, "Invalid command, type /help for a full list of commands.")
+
+bot.infinity_polling()
