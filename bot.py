@@ -80,7 +80,7 @@ def create_new_list(message):
         try:
             ls_title = extract_arg(message.text)[1]
         except:
-            bot.reply_to(message, "Missing parameters, type '/create <title>'")
+            bot.reply_to(message, "Your list needs a title! - Missing parameters, type '/create <title>'")
         else:        
             title = extract_title(message.text)
             list_exists = True
