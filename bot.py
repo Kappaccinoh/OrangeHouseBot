@@ -59,7 +59,7 @@ def remove_name(username):
 # Bot Commands
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Hi there, I am the dedicated Bot for Orange House!\nType in /help for my full list of commands.")
+    bot.reply_to(message, "HELLOO THEREE! My name is Soyaya, I am the mascot for Orange House! NICE TO MEET EVERYONE!\n\nHow may I assist yall today? Type in /help for my full list of commands.")
 
 
 @bot.message_handler(commands=['help'])
@@ -139,6 +139,6 @@ def delete_list(message):
 
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):
-    bot.reply_to(message, "Invalid command, type /help for a full list of commands.")
+    bot.reply_to(message, "I'm sorry I don't understand - Invalid command, type /help for a full list of commands.")
 
 bot.infinity_polling()
