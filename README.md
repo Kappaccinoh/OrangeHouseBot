@@ -1,8 +1,10 @@
 # OrangeHouseBot
 Telegram Bot for Orange House
 
+# In Progress
+
 # Bugs
-- Double Argument Problem in List Making
+- Interference with list due to PMs or activity in other group chat affects message
 
 # Future Developments
 - Expansion of Features(???)
@@ -11,3 +13,4 @@ Telegram Bot for Orange House
 - Review Appropriateness of Messages
     - Tidy up Help Page Messages
     - Tidy up Error Messages
+- Support Bot List capabilities for presence in multiple groups 
