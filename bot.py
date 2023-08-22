@@ -1,7 +1,9 @@
 import os
 import telebot
+import re
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
+# BOT_TOKEN = ""
 bot = telebot.TeleBot(BOT_TOKEN)
 
 
@@ -66,7 +68,7 @@ def send_welcome(message):
 def send_help(message):
     bot.reply_to(message, 
         "/create <title> - Creates a new and empty list\n" +
-        "/join <your name> <room_number> - Joins and or updates the current list (type /join again to override your previous entry)\n" +
+        "/join <your_name> <room_number> - Joins and or updates the current list (type /join again to override your previous entry)\n" +
         "/remove - Removes your current entry\n" +
         "/end - Deletes the current list of names"
     )
@@ -85,7 +87,7 @@ def create_new_list(message):
             title = extract_title(message.text)
             list_exists = True
             # bot.send_message(message.chat.id, title)
-            bot.send_message(message.chat.id, "To add an item to the list, type '/join <your name> <room_number>'")
+            bot.send_message(message.chat.id, "To add an item to the list, type '/join <your_name> <room_number>'")
     else:
         bot.reply_to(message, "There is an ongoing list already, type /end if you wish to terminate the current list, if not /join ")
 
@@ -99,12 +101,22 @@ def send_join_error(message):
             name = extract_arg(message.text)[1]
             room_number = extract_arg(message.text)[2]
         except:
-            bot.reply_to(message, "Missing parameters, type '/join <your name> <room_number>'")
-        else:        
-            username = message.from_user.username
-            update_message(name, room_number, username)
-            final_list = print_message()
-            bot.send_message(message.chat.id, final_list)
+            bot.reply_to(message, "Missing parameters. type '/join <your_name> <room_number>'")
+        else:
+            # check if room_number has # or is not an integer
+            # case 1: /join jiawei #21-114
+            # case 2: /join jia wei #21-114
+            # case 3: /join jiawei 21-114
+            if re.search('[a-zA-Z]', room_number) != None:
+                bot.reply_to(message, "Invalid Room Number, I think your name has a space in it, please remove it. type '/join <your_name> <room_number>'")
+            else:
+                if re.search('#', room_number) != None:
+                    room_number = room_number[1:]
+                room_number = "#" + room_number
+                username = message.from_user.username
+                update_message(name, room_number, username)
+                final_list = print_message()
+                bot.send_message(message.chat.id, final_list)
     else:
         bot.reply_to(message, "The list does not exist yet, type '/create <title>' to create a new list")
 
@@ -114,7 +126,7 @@ def remove_entry(message):
     global list_of_names
     if list_exists:
         remove_name(message.from_user.username)
-        bot.reply_to(message, "Removed successfully, type '/join <your name> <room_number>' to write a new entry")
+        bot.reply_to(message, "Removed successfully, type '/join <your_name> <room_number>' to write a new entry")
         final_list = print_message()
         bot.send_message(message.chat.id, final_list)
 
