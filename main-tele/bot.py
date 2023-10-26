@@ -51,9 +51,6 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 # Polling Functions
-'''
-/createpoll <title>, takes in one argument which is the title of the poll
-'''
 async def poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text='Enter the title of your Poll')
     
@@ -64,6 +61,10 @@ async def createpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(title)
 
+    # send json data 
+
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Poll Successfully Created")
+    
     return ConversationHandler.END
 
 
