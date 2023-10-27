@@ -9,7 +9,7 @@ import json
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-api_url = 'https://laundrobot-api.onrender.com'
+# api_url = 'https://laundrobot-api.onrender.com'
 api_url = 'http://localhost:4000'
 
 load_dotenv()
@@ -19,7 +19,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
-
 
 
 # Bot Admin Commands
@@ -52,6 +51,9 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 # Polling Functions
+async def getpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="RETRIEVE ALL POLL VALUES")
+
 async def poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text='Enter the title of your Poll')
     
@@ -59,12 +61,28 @@ async def poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def createpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     title = update.message.text
+    chatid = update.message.chat_id
 
     print(title)
+    print(chatid)
 
-    # send json data 
+    json_body = {
+        "chatid": chatid,
+        "polltitle": title
+    }
+    r = requests.post(
+        url=f'{api_url}/poll/create', 
+        json=json_body
+    )
 
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Poll Successfully Created")
+    print(r)
+
+    if r.status_code != requests.codes.ok:
+        message = f'Error, poll already exists in this chat'
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
+    else:
+        message = f'Poll Successfully Created - {json_body["polltitle"]}'
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
     return ConversationHandler.END
 
@@ -75,8 +93,6 @@ async def deletepoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = message.text
 
     await context.bot.send_message(chat_id=update.effective_chat.id, text="deletepoll")
-
-
 
 # Main Driver Code
 CREATEPOLL = range(1)

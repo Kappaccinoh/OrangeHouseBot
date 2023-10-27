@@ -13,16 +13,6 @@ app.get('/', (req, res) => {
   )
 })
 
-app.get('/help', (req, res) => {
-  res.send(
-    "/create <title> - Creates a new and empty list\n" +
-    "/join <your_name> <room_number> - Joins and or updates the current list (type /join again to override your previous entry)\n" +
-    "/remove - Removes your current entry\n" +
-    "/end - Deletes the current list of names"
-  )
-})
-
-
 // Logic for Polling Bot Start
 
 app.get('/poll', async (req, res) => {
@@ -38,12 +28,12 @@ app.get('/poll', async (req, res) => {
 
 app.post('/poll/create', async(req, res) => {
   try {
-    sqlQuery = `INSERT INTO ${process.env.DB_TABLE_NAME2} (chatid, polltitle) VALUES (${req.query['chatid']}, ${req.query['polltitle']})`;
+    sqlQuery = `INSERT INTO ${process.env.DB_TABLE_NAME2} (chatid, polltitle) VALUES (${req.body['chatid']}, '${req.body['polltitle']}')`;
     const result = await mysql.query(sqlQuery)
-    res.status(200).json(result);
+    res.status(200).json({message:"Success"})
   } catch (e) {
     console.log(e.message);
-    return res.status(500).json({message:e.message});
+    res.status(500).json({message:e.message});
   }
 });
 
