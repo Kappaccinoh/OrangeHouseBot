@@ -20,7 +20,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-CREATEPOLL = range(1)
+
 
 # Bot Admin Commands
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -50,6 +50,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
+
 # Polling Functions
 async def poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text='Enter the title of your Poll')
@@ -64,7 +65,7 @@ async def createpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # send json data 
 
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Poll Successfully Created")
-    
+
     return ConversationHandler.END
 
 
@@ -78,6 +79,8 @@ async def deletepoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # Main Driver Code
+CREATEPOLL = range(1)
+
 if __name__ == '__main__':
     application = ApplicationBuilder().token(BOT_TOKEN).build()
     

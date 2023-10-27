@@ -1,7 +1,7 @@
 const mysql = require('./utils/database');
 const express = require('express');
 const bodyParser = require("body-parser");
-
+require('dotenv').config()
 
 const app = express();
 app.use(bodyParser.json());
@@ -40,16 +40,14 @@ app.get('/poll', (req, res) => {
 
 app.post('/poll/create', async(req, res) => {
   try {
-    const 
+    sqlQuery = `INSERT INTO ${process.env.DB_TABLE_NAME} (name, room, telehandle, chatid) VALUES (${req.query['name']}, ${req.query['room']}, ${req.query['telehandle']}, ${req.query['chatid']})`;
+    const result = await mysql
+    .query(sqlQuery)
   } catch (e) {
     console.log(e.message);
-    res.status(500).json({message:e.message})
+    return res.status(500).json({message:e.message});
   }
 });
-
-
-
-
 
 // Logic for Polling Bot End
 
