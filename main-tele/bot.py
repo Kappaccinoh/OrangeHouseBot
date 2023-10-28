@@ -52,7 +52,19 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 # Polling Functions
 async def getpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="RETRIEVE ALL POLL VALUES")
+    r = requests.get(
+        url=f'{api_url}/poll',
+        json={"chatid":update.message.chat_id}
+    )
+    
+    print(r)
+
+    if r.status_code != requests.codes.ok:
+        message = f'Error, no existing polls found'
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
+    else:
+        message = f'RESULTS'
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 async def poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text='Enter the title of your Poll')
@@ -62,9 +74,6 @@ async def poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def createpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     title = update.message.text
     chatid = update.message.chat_id
-
-    print(title)
-    print(chatid)
 
     json_body = {
         "chatid": chatid,
@@ -76,8 +85,6 @@ async def createpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
         url=f'{api_url}/poll/create', 
         json=json_body
     )
-
-    print(r)
 
     if r.status_code != requests.codes.ok:
         message = f'Error, poll already exists in this chat, please delete the existing poll - {json_body["polltitle"]}, before creating a new one'
@@ -106,6 +113,8 @@ if __name__ == '__main__':
     help_handler = CommandHandler("help", help)
     unknown_handler = MessageHandler(filters.COMMAND, unknown)
 
+    getpoll_handler = CommandHandler("getpoll", getpoll)
+
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("poll", poll)],
         states={
@@ -113,11 +122,13 @@ if __name__ == '__main__':
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
-    application.add_handler(conv_handler)
 
+    application.add_handler(conv_handler)
     application.add_handler(start_handler)
     application.add_handler(help_handler)
     application.add_handler(unknown_handler)
+
+    application.add_handler(getpoll_handler)
 
     application.run_polling()
     
