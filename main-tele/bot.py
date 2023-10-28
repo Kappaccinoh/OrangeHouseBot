@@ -70,6 +70,8 @@ async def createpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "chatid": chatid,
         "polltitle": title
     }
+
+    # Sending POST HTTP Request
     r = requests.post(
         url=f'{api_url}/poll/create', 
         json=json_body
@@ -78,7 +80,7 @@ async def createpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(r)
 
     if r.status_code != requests.codes.ok:
-        message = f'Error, poll already exists in this chat'
+        message = f'Error, poll already exists in this chat, delete the existing poll before creating a new one'
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
     else:
         message = f'Poll Successfully Created - {json_body["polltitle"]}'
