@@ -3,6 +3,11 @@ const express = require('express');
 const bodyParser = require("body-parser");
 require('dotenv').config();
 
+process.on('uncaughtException', function (err) {
+  console.error(err);
+  console.log("Node NOT Exiting...");
+});
+
 const app = express();
 app.use(bodyParser.json());
 
@@ -28,8 +33,15 @@ app.get('/', (req, res) => {
 
 app.post('/poll/create', async(req, res, next) => {
   sqlQuery = `INSERT INTO ${process.env.DB_TABLE_NAME2} (chatid, polltitle) VALUES (${req.body['chatid']}, '${req.body['polltitle']}')`;
-  const result = await mysql.query(sqlQuery);
-  res.send(result);
+  const poll = await mysql.query(sqlQuery, function (err, results) {
+    if (err) {
+      console.log(poll);
+      res.status(500).send("Error Creating Poll");
+    } else {
+      console.log(poll);
+      res.status(200).send("Poll Successfully Created");
+    }
+  });
 });
 
 // app.post('/poll/join', async(req, res, next) => {

@@ -80,7 +80,7 @@ async def createpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(r)
 
     if r.status_code != requests.codes.ok:
-        message = f'Error, poll already exists in this chat, delete the existing poll before creating a new one'
+        message = f'Error, poll already exists in this chat, please delete the existing poll - {json_body["polltitle"]}, before creating a new one'
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
     else:
         message = f'Poll Successfully Created - {json_body["polltitle"]}'
