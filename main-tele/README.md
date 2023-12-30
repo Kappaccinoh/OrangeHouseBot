@@ -2,8 +2,8 @@
 Telegram Bot for Orange House
 
 # In Progress
-- Delete Entry
-- Join Poll
+- Join with parameters
+- Display poll with better UI
 
 # Bugs
 - Interference with list due to PMs or activity in other group chat affects message
