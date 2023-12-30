@@ -2,6 +2,8 @@
 Telegram Bot for Orange House
 
 # In Progress
+- Delete Entry
+- Join Poll
 
 # Bugs
 - Interference with list due to PMs or activity in other group chat affects message
