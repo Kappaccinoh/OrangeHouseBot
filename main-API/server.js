@@ -1,6 +1,7 @@
 const mysql = require('./utils/database');
 const express = require('express');
 const bodyParser = require("body-parser");
+const CircularJSON = require('circular-json');
 require('dotenv').config();
 
 process.on('uncaughtException', function (err) {
@@ -21,14 +22,29 @@ app.get('/', (req, res) => {
 // Logic for Polling Bot Start
 
 app.get('/poll', async (req, res) => {
-  sqlQuery = `SELECT * FROM ${process.env.DB_TABLE_NAME} WHERE chatid = ${req.query['chatid']}`;
+  chatid = parseInt(req.body['chatid'])
+  sqlQuery = `SELECT * FROM ${process.env.DB_TABLE_NAME} WHERE chatid=${chatid}`;
   const result = await mysql.query(sqlQuery, function (err, results) {
+    
     if (err) {
       console.log(result);
       res.status(500).send("Error Retreving Existing Poll");
     } else {
+      console.log(results)
+      res.status(200).send(results);
+    }
+  });
+})
+
+app.get('/poll/getTitle', async (req, res) => {
+  sqlQuery = `SELECT polltitle FROM ${process.env.DB_TABLE_NAME2} WHERE chatid=${chatid}`;
+  const result = await mysql.query(sqlQuery, function (err, results) {
+    if (err) {
       console.log(result);
-      res.status(200).send("Results Retreived Successfully");
+      res.status(500).send("Error Retreving Poll Title");
+    } else {
+      console.log(results)
+      res.status(200).send(results);
     }
   });
 })
@@ -47,11 +63,6 @@ app.post('/poll/create', async(req, res) => {
 });
 
 app.post('/poll/join', async(req, res) => {
-  // sqlQuery = `INSERT INTO ${process.env.DB_TABLE_NAME} (name, room, telehandle, chatid) ` +
-  //   `VALUES ` + 
-  //   `('${req.body['name']}', '${req.body['room']}', '${req.body['telehandle']}', '${req.body['chatid']}') ` +
-  //   `WHERE NOT EXISTS (SELECT telehandle FROM ${process.env.DB_TABLE_NAME} WHERE telehandle='${req.body['telehandle']}')`;
-  
   sqlQuery = `INSERT INTO ${process.env.DB_TABLE_NAME} (name, room, telehandle, chatid) ` +
     `SELECT '${req.body['name']}', '${req.body['room']}', '${req.body['telehandle']}', ${req.body['chatid']} ` +
     `WHERE NOT EXISTS ` +

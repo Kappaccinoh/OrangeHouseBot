@@ -53,18 +53,37 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 # Polling Functions
 async def getpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    json_body = {
+        "chatid": update.message.chat_id,
+    }
+
     r = requests.get(
         url=f'{api_url}/poll',
-        json={"chatid":update.message.chat_id}
+        json=json_body
     )
-    
-    print(r)
+
+    title = requests.get(
+        url=f'{api_url}/poll/getTitle',
+        json=json_body
+    )
+
+    # Iterating and Formatting Database Values
+    data = r.json()
+    title = title.json()
+    messageString = title[0]['polltitle'] + '\n\n'
+    for d in data:
+        name = d['name']
+        room = d['room']
+        telehandle = d['telehandle']
+        sentence = f'{name} {room} @{telehandle}\n'
+        messageString += sentence
 
     if r.status_code != requests.codes.ok:
         message = f'Error, no existing polls found'
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
     else:
-        message = f'RESULTS'
+        message = messageString
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 async def poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -172,18 +191,18 @@ if __name__ == '__main__':
     start_handler = CommandHandler("start", start)
     help_handler = CommandHandler("help", help)
     unknown_handler = MessageHandler(filters.COMMAND, unknown)
-
-    # getpoll_handler = CommandHandler("getpoll", getpoll)
+    getpoll_handler = CommandHandler("getpoll", getpoll)
 
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("create", poll),
             CommandHandler("delete", deletepoll),
-            CommandHandler("join", joinpoll)
+            CommandHandler("join", joinpoll),
+            CommandHandler("get", getpoll)
         ],
         states={
             CREATEPOLL: [MessageHandler(filters.TEXT, createpoll)],
-            # GETPOLL: [MessageHandler(filters.TEXT, getpoll)],
+            GETPOLL: [MessageHandler(filters.TEXT, getpoll)],
             JOINPOLL: [MessageHandler(filters.TEXT, joinpoll)],
             DELETEPOLL: [MessageHandler(filters.TEXT, deletepoll)],
 
@@ -195,8 +214,7 @@ if __name__ == '__main__':
     application.add_handler(start_handler)
     application.add_handler(help_handler)
     application.add_handler(unknown_handler)
-
-    # application.add_handler(getpoll_handler)
+    application.add_handler(getpoll_handler)
 
     application.run_polling()
     
