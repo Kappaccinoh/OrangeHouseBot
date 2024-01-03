@@ -191,6 +191,32 @@ async def joinpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return ConversationHandler.END
 
+async def removepoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chatid = update.message.chat_id
+    user = update.message.from_user
+    user_handle = user['username']
+        
+    json_body = {
+        "telehandle": user_handle,
+        "chatid": chatid,
+    }
+
+    # Sending POST HTTP Request
+    r = requests.delete(
+        url=f'{api_url}/poll/remove', 
+        json=json_body
+    )
+
+    if r.status_code != requests.codes.ok:
+        message = f'Error, you are not currently in any polls, type /join to join the existing poll'
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
+
+    else:
+        message = f'Removed Entry from Poll Successfully'
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
+        await getpoll(update, context)
+
+    return ConversationHandler.END
 
 
 
@@ -216,7 +242,8 @@ if __name__ == '__main__':
             CommandHandler("create", poll),
             CommandHandler("delete", deletepoll),
             CommandHandler("join", getName),
-            CommandHandler("get", getpoll)
+            CommandHandler("get", getpoll),
+            CommandHandler("remove", removepoll)
         ],
         states={
             CREATEPOLL: [MessageHandler(filters.TEXT, createpoll)],

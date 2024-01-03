@@ -83,6 +83,19 @@ app.post('/poll/join', async(req, res) => {
   });
 });
 
+app.delete('/poll/remove', async(req, res) => {
+  sqlQuery = `DELETE FROM ${process.env.DB_TABLE_NAME} WHERE telehandle='${req.body['telehandle']}' AND chatid=${req.body['chatid']}`
+  const remove = await mysql.query(sqlQuery, function (err, results) {
+    if (err) {
+      console.log(remove);
+      res.status(500).send("Error Removing Entry From Poll");
+    } else {
+      console.log(remove);
+      res.status(200).send("Removed Entry From Poll Successfully");
+    }
+  });
+});
+
 app.delete('/poll/delete', async(req, res) => {
   sqlQuery = `DELETE FROM ${process.env.DB_TABLE_NAME2} WHERE chatid=${req.body['chatid']}`;
   const join = await mysql.query(sqlQuery, function (err, results) {

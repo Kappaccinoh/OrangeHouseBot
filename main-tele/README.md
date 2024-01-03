@@ -2,7 +2,7 @@
 Telegram Bot for Orange House
 
 # In Progress
-- /remove from poll
+
 
 # Bugs
 - Interference with list due to PMs or activity in other group chat affects message
