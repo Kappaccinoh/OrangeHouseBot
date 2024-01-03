@@ -2,8 +2,7 @@
 Telegram Bot for Orange House
 
 # In Progress
-- Join with parameters
-- Display poll with better UI
+- /remove from poll
 
 # Bugs
 - Interference with list due to PMs or activity in other group chat affects message
@@ -16,3 +15,4 @@ Telegram Bot for Orange House
     - Tidy up Help Page Messages
     - Tidy up Error Messages
 - Support Bot List capabilities for presence in multiple groups 
+- BOT to dm the person instead of polling on the group

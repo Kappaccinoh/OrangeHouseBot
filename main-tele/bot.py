@@ -143,16 +143,33 @@ async def deletepoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return ConversationHandler.END
 
-async def joinpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def getName(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(text='Enter your Name')
     
+    return GETROOM
+
+async def getRoom(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['Name'] = update.message.text
+    await update.message.reply_text(text='Enter your Room Number')
+    
+    return JOINPOLL
+
+async def joinpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Processing Room Format
+    room = update.message.text
+    if room.startswith('#'):
+        room = room
+    else:
+        # Add # in front of the string
+        room = '#' + room
+
     chatid = update.message.chat_id
     user = update.message.from_user
     user_handle = user['username']
-    asdf = update.message.text # requires processing
         
     json_body = {
-        "name": "Jia Wei",
-        "room": "#21-114",
+        "name": context.user_data.get('Name'),
+        "room": room,
         "telehandle": user_handle,
         "chatid": chatid,
     }
@@ -170,6 +187,7 @@ async def joinpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         message = f'Poll Joined Successfully'
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
+        await getpoll(update, context)
 
     return ConversationHandler.END
 
@@ -180,10 +198,10 @@ async def joinpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Main Driver Code
 
 # Various State Numeration
-GETPOLL = 1
-CREATEPOLL = 2
+CREATEPOLL = 1
+GETROOM = 2
 JOINPOLL = 3
-DELETEPOLL = 4
+GETPOLL = 4
 
 if __name__ == '__main__':
     application = ApplicationBuilder().token(BOT_TOKEN).build()
@@ -197,15 +215,14 @@ if __name__ == '__main__':
         entry_points=[
             CommandHandler("create", poll),
             CommandHandler("delete", deletepoll),
-            CommandHandler("join", joinpoll),
+            CommandHandler("join", getName),
             CommandHandler("get", getpoll)
         ],
         states={
             CREATEPOLL: [MessageHandler(filters.TEXT, createpoll)],
-            GETPOLL: [MessageHandler(filters.TEXT, getpoll)],
+            GETROOM: [MessageHandler(filters.TEXT, getRoom)],
             JOINPOLL: [MessageHandler(filters.TEXT, joinpoll)],
-            DELETEPOLL: [MessageHandler(filters.TEXT, deletepoll)],
-
+            GETPOLL: [MessageHandler(filters.TEXT, getpoll)]
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )

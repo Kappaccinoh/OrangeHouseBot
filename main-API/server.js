@@ -64,11 +64,13 @@ app.post('/poll/create', async(req, res) => {
 
 app.post('/poll/join', async(req, res) => {
   sqlQuery = `INSERT INTO ${process.env.DB_TABLE_NAME} (name, room, telehandle, chatid) ` +
-    `SELECT '${req.body['name']}', '${req.body['room']}', '${req.body['telehandle']}', ${req.body['chatid']} ` +
-    `WHERE NOT EXISTS ` +
-      `(SELECT telehandle ` +
-      `FROM ${process.env.DB_TABLE_NAME} ` +
-      `WHERE telehandle = '${req.body['telehandle']}')`
+    `VALUES ('${req.body['name']}', '${req.body['room']}', '${req.body['telehandle']}', ${req.body['chatid']}) ` +
+    `ON DUPLICATE KEY UPDATE ` +
+    `name = VALUES(name), ` +
+    `room = VALUES(room), ` +
+    `telehandle = VALUES(telehandle), ` +
+    `chatid = VALUES(chatid);`
+  
 
   const join = await mysql.query(sqlQuery, function (err, results) {
     if (err) {
