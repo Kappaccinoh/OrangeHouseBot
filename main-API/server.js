@@ -53,10 +53,10 @@ app.post('/poll/create', async(req, res) => {
   sqlQuery = `INSERT INTO ${process.env.DB_TABLE_NAME2} (chatid, polltitle) VALUES (${req.body['chatid']}, '${req.body['polltitle']}')`;
   const poll = await mysql.query(sqlQuery, function (err, results) {
     if (err) {
-      console.log(poll);
+      console.log(results);
       res.status(500).send("Error Creating Poll");
     } else {
-      console.log(poll);
+      console.log(results);
       res.status(200).send("Poll Successfully Created");
     }
   });

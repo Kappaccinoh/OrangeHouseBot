@@ -33,6 +33,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = \
         '/create - Allows you to create a poll in which people can join\n\n' \
+        '/join - Allows you join an existing poll\n\n' \
+        '/remove - Allows you to remove your entry from an existing poll\n\n' \
+        '/delete - Allows you to delete an existing poll\n\n' \
+        '/cancel - Cancel the current command'
 
 
     await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
@@ -42,7 +46,6 @@ async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
-    logger.info("User %s canceled the conversation.", user.first_name)
     await update.message.reply_text(
         "Bye! I hope we can talk again some day.", reply_markup=ReplyKeyboardRemove()
     )
@@ -71,18 +74,18 @@ async def getpoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Iterating and Formatting Database Values
     data = r.json()
     title = title.json()
-    messageString = title[0]['polltitle'] + '\n\n'
-    for d in data:
-        name = d['name']
-        room = d['room']
-        telehandle = d['telehandle']
-        sentence = f'{name} {room} @{telehandle}\n'
-        messageString += sentence
-
-    if r.status_code != requests.codes.ok:
+    if len(title) == 0:
         message = f'Error, no existing polls found'
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
     else:
+        messageString = title[0]['polltitle'] + '\n\n'
+        for d in data:
+            name = d['name']
+            room = d['room']
+            telehandle = d['telehandle']
+            sentence = f'{name} {room} @{telehandle}\n'
+            messageString += sentence
+        
         message = messageString
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
@@ -243,7 +246,8 @@ if __name__ == '__main__':
             CommandHandler("delete", deletepoll),
             CommandHandler("join", getName),
             CommandHandler("get", getpoll),
-            CommandHandler("remove", removepoll)
+            CommandHandler("remove", removepoll),
+            CommandHandler("cancel", cancel)
         ],
         states={
             CREATEPOLL: [MessageHandler(filters.TEXT, createpoll)],
